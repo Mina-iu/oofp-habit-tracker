@@ -1,0 +1,3 @@
+# The application (main.py, db.py, habit.py, analytics.py, seed.py) uses only
+# the Python standard library. pytest is required only to run test_habits.py.
+pytest>=7
