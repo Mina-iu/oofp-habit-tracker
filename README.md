@@ -303,6 +303,23 @@ pytest -q
 
 The tests use an in-memory SQLite database and a frozen "today" and "now" (09:30), so they never modify your real `habits.db` and give the same result at any time of day. They cover habit creation, completion (date and time), streaks, every `analyze` flag, the dashboard, the database upgrade and output that is redirected on Windows (cp1252). The end-to-end tests copy the source files into an empty temporary folder and run `seed.py` / `main.py` there, exactly like a fresh clone.
 
+## Architecture
+
+```mermaid
+flowchart LR
+    U([User]) --> CLI["main.py<br/>argparse CLI"]
+    CLI --> H["habit.py<br/>Habit / Build / Break<br/>+ pure streak functions"]
+    CLI --> DB["db.py<br/>SQLite layer"]
+    DB <--> S[("habits.db")]
+    DB --> H
+    CLI --> A["analytics.py<br/>pure functions"]
+    H --> A
+    SEED["seed.py<br/>5 sample habits"] --> DB
+    T["helper.py<br/>clock helpers"] --> CLI
+```
+
+Flow: the CLI loads habits through `db.py`, changes them (create, check off, delete) and saves them back; `analytics.py` only reads the loaded habit objects and returns results.
+
 ## Project layout
 
 | File | Role |
@@ -315,5 +332,10 @@ The tests use an in-memory SQLite database and a frozen "today" and "now" (09:30
 | `helper.py` | Clock helpers (`get_current_time_period`, `get_today`, `get_now`). |
 | `test_habits.py` | pytest suite. |
 | `requirements.txt` | `pytest>=7` (tests only). |
-| `.gitignore` | Keeps `__pycache__/` and `.pytest_cache/` out of the repository. |
+| `.gitignore` | Keeps caches (`__pycache__/`, `.pytest_cache/`, `.coverage`), virtual environments (`.venv/`, `venv/`) and `.DS_Store` out of the repository. |
+| `LICENSE` | MIT License. |
 | `habits.db` | The SQLite database (created on first run; this copy is seeded). |
+
+## License
+
+Released under the [MIT License](LICENSE). Copyright (c) 2026 Mina Ameen.
